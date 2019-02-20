@@ -1,0 +1,170 @@
+% Homework problem environments
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{homework}[2016/02/19 Homework Environments]
+
+% Parts of homework environments
+\RequirePackage{fancyhdr}     % Required for custom headers
+\RequirePackage{lastpage}     % Required to determine the last page for the footer
+\RequirePackage{extramarks}   % Required for headers and footers
+\RequirePackage{enumitem}     % Improved enumerate for problem sections
+\RequirePackage{genmpage}     % Better minipage
+\RequirePackage[
+  framemethod=default
+]{mdframed}               % For framing solution answers
+
+\RequirePackage{kvoptions}
+
+\SetupKeyvalOptions{
+    family=homework,
+    prefix=hw@
+}
+
+\DeclareStringOption[Homework]{title}
+\DeclareStringOption{due}
+\DeclareStringOption{class}
+\DeclareStringOption{classtitle}
+\DeclareStringOption{author}
+
+\ProcessKeyvalOptions*
+
+% Frame styles
+\mdfdefinestyle{answerstyle}{%
+    rightline=true,
+    innerleftmargin=10,
+    innerrightmargin=10,
+    frametitlerule=true,
+    frametitlerulewidth=1pt
+}
+\mdfdefinestyle{answerstyle2}{%
+    rightline=true,
+    innerleftmargin=10,
+    innerrightmargin=10,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Document properties
+%%%%%%%%%%%%%%%%%%%%%%%
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+% Line spacing
+\linespread{1.1}
+
+%	Title page
+\title{
+  \vspace{2in}
+\ifx\hw@class\@empty
+  \textmd{\textbf{\hw@title}}\\
+\else
+  \textmd{\textbf{\hw@class: \hw@title}}\\
+\fi
+% Lots of gymnastics to make spacing consistent with/without class and due date
+\ifx\hw@due\@empty
+\else
+  \vspace{0.1in}
+  \small{Due\ on\ \hw@due}\\
+\fi
+  \vspace{0.1in}
+\ifx\hw@classtitle\@empty
+  \large{\ }\\
+\else
+  \large{\textit{\hw@classtitle}}\\
+\fi
+\ifx\hw@due\@empty
+  \vspace{0.1in}
+  \small{\ }
+\fi
+  \vspace{3in}
+}
+\author{
+  \textbf{\hw@author}
+}
+\date{}
+
+% Header and footer
+\pagestyle{fancy}
+\lhead{\hw@author} % Top left header
+
+\chead{\hw@class\ \hw@classtitle: \hw@title} % Top center header
+% \rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+%%%%%%%%%%%%%%%%%%%%%
+%	Homework commands %
+%%%%%%%%%%%%%%%%%%%%%
+% Removes default section numbers
+\setcounter{secnumdepth}{0}
+% Creates a counter to keep track of the number of problems
+\newcounter{homeworkProblemCounter}
+
+% Commands used in the environments to keep up with names
+\newcommand{\homeworkProblemName}{}
+\newcommand{\homeworkSectionName}{}
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+  \nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+  \nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+  \nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+  \nobreak\extramarks{#1}{}\nobreak
+}
+
+% Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]
+{
+  \stepcounter{homeworkProblemCounter}
+  \renewcommand{\homeworkProblemName}{#1}
+  \section{\homeworkProblemName}
+  \enterProblemHeader{\homeworkProblemName}
+}
+{
+  \exitProblemHeader{\homeworkProblemName}
+  \clearpage
+}
+% Sections within homework problems
+% 1 argument - the name of the section
+\newenvironment{homeworkSection}[1]{
+  % Assign \homeworkSectionName to the environment argument
+  \renewcommand{\homeworkSectionName}{#1}
+  % Make a subsection with the custom name of the subsection
+  \subsection{\homeworkSectionName}
+  % Header and footer within the environment
+  \enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]}
+}{
+  % Header and footer after the environment
+  \enterProblemHeader{\homeworkProblemName}
+}
+
+
+% Define the answer and answer* environments
+\newcommand{\defparindent}{0.5cm}
+\newenvironment{answer}[1][Solution]{
+  \begin{mdframed}[style=answerstyle,frametitle={#1}]
+    \setlength{\parindent}{\defparindent}
+    \ignorespaces
+}
+{
+  \end{mdframed}
+}
+\newenvironment{answer*}{
+  \begin{mdframed}[style=answerstyle2]
+    \setlength{\parindent}{\defparindent}\ignorespaces
+}
+{
+  \end{mdframed}
+}
+
+\endinput
